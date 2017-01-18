@@ -11,6 +11,7 @@ class SlackClient {
         slackKit = SlackKit(withAPIToken: config.apiToken)
         slackKit.onClientInitalization = {[weak self] slackClient in
             self?.slackClient = slackClient
+            self?.slackClient?.messageEventsDelegate = self
         }
     }
     
@@ -23,4 +24,15 @@ class SlackClient {
                                         success: nil,
                                         failure: nil)
     }
+}
+
+extension SlackClient: MessageEventsDelegate {
+    
+    func sent(_ message: Message, client: Client) {}
+    
+    func received(_ message: Message, client: Client) {}
+    
+    func changed(_ message: Message, client: Client) {}
+    
+    func deleted(_ message: Message?, client: Client) {}
 }

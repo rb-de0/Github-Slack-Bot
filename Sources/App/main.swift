@@ -28,8 +28,4 @@ DispatchQueue.global().async {
     Kitura.run()
 }
 
-DispatchQueue.global().asyncAfter(deadline: .now() + 3) {
-    slackClient.sendMessage(message: "hoge")
-}
-
 RunLoop.main.run()
