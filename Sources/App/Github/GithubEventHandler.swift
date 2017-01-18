@@ -4,6 +4,8 @@ protocol GithubEventHandler {
     
     associatedtype Event: GithubEventObject, Decodable
     
+    var name: String { get }
+    
     func decode(json: Any) throws -> Event
     
     func onCreated(event: Event)

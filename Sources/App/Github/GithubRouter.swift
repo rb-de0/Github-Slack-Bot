@@ -4,11 +4,11 @@ import KituraNet
 
 class GithubRouter {
     
-    private var handlers = [GithubEvent: RequestHandler]()
+    private var handlers = [String: RequestHandler]()
     
     typealias RequestHandler = (Any) throws -> ()
     
-    func add<Handler: GithubEventHandler>(_ event: GithubEvent, eventHandler: Handler) {
+    func add<Handler: GithubEventHandler>(_ eventHandler: Handler) {
         
         let requestHandler: RequestHandler = { json in
             
@@ -35,18 +35,17 @@ class GithubRouter {
             }
         }
 
-        handlers[event] = requestHandler
+        handlers[eventHandler.name] = requestHandler
     }
     
     func run(request: RouterRequest) throws {
         
-        guard let eventName = request.headers["X-Github-Event"],
-            let event = GithubEvent(rawValue: eventName) else {
+        guard let eventName = request.headers["X-Github-Event"] else {
                 
             throw GithubError.badRequest
         }
         
-        if case .ping = event {
+        if eventName == "ping" {
             return
         }
         
@@ -61,7 +60,7 @@ class GithubRouter {
             throw GithubError.badRequest
         }
         
-        try handlers[event]?(json)
+        try handlers[eventName]?(json)
     }
     
 }
