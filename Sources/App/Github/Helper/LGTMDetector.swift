@@ -11,10 +11,10 @@ class LGTMDetector {
         }
         
         let start = body.index(body.startIndex, offsetBy: match.range.location)
-        let end = body.index(body.startIndex, offsetBy: match.range.length)
+        let end = body.index(body.startIndex, offsetBy: match.range.length + match.range.location)
         
         let lgtmText = body[start..<end]
-        let otherText = body.replacingCharacters(in: start..<end, with: "")
+        let otherText = body.replacingCharacters(in: start..<end, with: "") + "\nLGTM"
         
         let urlStart = lgtmText.index(lgtmText.startIndex, offsetBy: 8)
         let urlEnd = lgtmText.index(lgtmText.endIndex, offsetBy: -1)

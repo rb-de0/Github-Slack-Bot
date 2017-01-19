@@ -1,4 +1,5 @@
 import Himotoki
+import SlackKit
 
 class PullRequestReviewHandler: GithubEventHandler {
     
@@ -10,24 +11,39 @@ class PullRequestReviewHandler: GithubEventHandler {
         
         let action: String
         let body: String
+        let pullRequestTitle: String
         let pullRequestNumber: Int
         let pullRequestURL: String
-        let reviewUserName: String
+        let reviewerName: String
         let repositoryName: String
         
         static func decode(_ e: Extractor) throws -> PullRequestReviewEvent {
             return try PullRequestReviewEvent(
                 action: e <| "action",
                 body: e <| ["review", "body"],
+                pullRequestTitle: e <| ["pull_request", "title"],
                 pullRequestNumber: e <| ["pull_request", "number"],
                 pullRequestURL: e <| ["pull_request", "html_url"],
-                reviewUserName: e <| ["review", "user", "login"],
+                reviewerName: e <| ["review", "user", "login"],
                 repositoryName: e <| ["repository", "full_name"]
             )
         }
     }
     
     func onSubmitted(event: PullRequestReviewEvent) {
-        // some
+        
+        let pullRequestName = "#\(event.pullRequestNumber): \(event.pullRequestTitle)"
+        let pullRequestLink = "<\(event.pullRequestURL)|\(pullRequestName)>"
+        let pretext = "[\(event.repositoryName)] New review by \(event.reviewerName) on pull request \(pullRequestLink)"
+        let lgtmInfo = LGTMDetector.detect(from: event.body)
+        
+        let attachment = Attachment(fallback: pretext,
+                                    title: "",
+                                    colorHex: AttachmentColor.good.rawValue,
+                                    pretext: pretext,
+                                    text: lgtmInfo?.otherText ?? event.body,
+                                    imageURL: lgtmInfo?.lgtmImageURL)
+        
+        slackClient.sendMessage(message: "", attachments: [attachment])
     }
 }
