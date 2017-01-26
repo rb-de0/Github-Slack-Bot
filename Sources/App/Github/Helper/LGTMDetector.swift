@@ -4,21 +4,18 @@ class LGTMDetector {
     
     class func detect(from body: String) -> (lgtmImageURL: String, otherText: String)? {
         
+        let text = body as NSString
+        
         let regex = try! NSRegularExpression(pattern: "!\\[LGTM\\]\\(.*\\)", options: .caseInsensitive)
         
-        guard let match = regex.matches(in: body, options: [], range: NSRange(location: 0, length: body.characters.count)).first else {
+        guard let match = regex.matches(in: body, options: [], range: NSRange(location: 0, length: text.length)).first else {
             return nil
         }
         
-        let start = body.index(body.startIndex, offsetBy: match.range.location)
-        let end = body.index(body.startIndex, offsetBy: match.range.length + match.range.location)
-        
-        let lgtmText = body[start..<end]
-        let otherText = body.replacingCharacters(in: start..<end, with: "") + "\nLGTM"
-        
-        let urlStart = lgtmText.index(lgtmText.startIndex, offsetBy: 8)
-        let urlEnd = lgtmText.index(lgtmText.endIndex, offsetBy: -1)
-        let url = lgtmText[urlStart..<urlEnd]
+        let lgtmText = text.substring(with: match.range)
+        let otherText = text.replacingCharacters(in: match.range, with: "") + "\nLGTM"
+        let urlLength = (lgtmText as NSString).length - 9
+        let url = (lgtmText as NSString).substring(with: NSRange(location: 8, length: urlLength))
         
         return (url, otherText)
     }
